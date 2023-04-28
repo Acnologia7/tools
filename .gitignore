@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+
+venv/
+
+tst.py
+*.7z
+log.run
+alpha.water
+zadani-python.pdf
+
