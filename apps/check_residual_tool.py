@@ -57,7 +57,7 @@ class CheckResidual:
             omega_y = [float(t[2]) for t in self.lst]
             k_y = [float(t[3]) for t in self.lst]
 
-            fig, ax = plt.subplots(figsize=(figx, figy)).su
+            fig, ax = plt.subplots(figsize=(figx, figy))
 
             ax.semilogy(x, p_rgh_y, 'b', label='p_rgh')
             ax.semilogy(x, omega_y, 'g', label='omega')
@@ -89,6 +89,7 @@ if __name__ == '__main__':
     parser.add_argument('--print', type=bool, help='argument for printing result')
     parser.add_argument('--chunk', type=int, default=1024, help='size of the chunks in bytes (default: 1024)')
     parser.add_argument('--plot', type=bool, help='argument for ploting graph')
+    parser.add_argument('--figure_size', type=str, default='20, 20', help='x and y size of graph figure, use in string separated by ","')
     parser.add_argument('--output', type=str, help='path for the output file')
 
     args = parser.parse_args()
@@ -105,6 +106,7 @@ if __name__ == '__main__':
         t.save_to_file(output_filepath=args.output)
     
     if args.plot:
-        t.plot_graph()
-    
+        x, y = args.figure_size.split(',')
+        t.plot_graph(figx=int(x), figy=int(y))
+     
     print(f"Elapsed time: {elapsed_time:.2f} seconds")
