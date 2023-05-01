@@ -1,38 +1,79 @@
 import pandas as pd
+import argparse, time
+
 
 class DynamicTermination:
-    def __init__(self, filename):
-        self.filename = filename
+    
+    def __init__(self, input_filepath: str, diff_of_residual: float=0.1, max_w_fraction_criterium: float=0.5, idx_increment: int=20000):
+        self.input_filepath = input_filepath
+        self.diff_of_residual = diff_of_residual
+        self.idx_increment = idx_increment
+        self.max_w_fraction_criterium = max_w_fraction_criterium
 
     def find_time_to_terminate(self):
-        df = pd.read_csv(self.filename, skiprows=2, delim_whitespace=True, 
+        try:
+            df = pd.read_csv(self.input_filepath, skiprows=2, delim_whitespace=True, 
                          names=['Time', 'Water Fraction'], comment='#', 
                          usecols=[0, 1], dtype={'Time': float, 'Water Fraction': float})
-        
-        start_idx = 0
-        end_idx = 20000
-
-        lenght_df= len(df)
-        
-        while end_idx < lenght_df:
-            df_subset = df[start_idx:end_idx]
-
-            time_T_subset = df_subset[df_subset['Water Fraction'] < 0.5]['Time']
             
-            if len(time_T_subset) > 0:
-                time_T = time_T_subset.iloc[-1]
-                diff = df_subset['Water Fraction'].max() - df_subset['Water Fraction'].min()
-                
-                if diff < 0.1:
-                    return time_T
+            '''
+            time_T_subset = df.query('`Water Fraction` < @self.max_w_fraction_criterium')['Time']
+            
+            for time in time_T_subset:
+                idx = df['Time'].index[df['Time']==time][0]
+                wf_subset = df.iloc[idx-self.idx_increment:idx]['Water Fraction']
+                diff = wf_subset.max() -  wf_subset.min()
+            
+                if diff < self.diff_of_residual:
+                    return time
 
-            start_idx += 20000
-            end_idx += 20000
+            return None
+            '''
 
-            if end_idx >= len(df):
-                end_idx = len(df)
+            #faster?
+            mask = df['Water Fraction'] < self.max_w_fraction_criterium
+            start_idxs = df[mask].index
 
-        return None
+            for idx in start_idxs:
+                if idx >= self.idx_increment:
+                    wf_subset = df.loc[idx-self.idx_increment:idx, 'Water Fraction']
+                    diff = wf_subset.max() - wf_subset.min()
+                    if diff < self.diff_of_residual:
+                        time_T_subset = df.loc[idx, 'Time']
+                        return time_T_subset
 
-t = DynamicTermination('alpha.water')
-t.find_time_to_terminate()
+            return None
+           
+        except FileNotFoundError as e:
+            print(f"Error: {e}. Could not find file '{self.input_filepath}'")
+        
+        except Exception as e:
+            print(f"Error: {e}. An error occurred while processing the file '{self.input_filepath}'")
+
+
+if __name__=='__main__':
+    
+    parser = argparse.ArgumentParser(description='Check for residual toolscript')
+    
+    parser.add_argument('input_filepath', type=str, help='path to the input file')
+    parser.add_argument('--residual_diff', type=float, default=0.1, help='how big is residual difference (maximum)')
+    parser.add_argument('--w_f_criterium', type=float, default=0.5, help='max value of water fraction criterium in time T')
+    parser.add_argument('--sample_chunk', type=int, default=20000, help='chunk size of search sample')
+
+    args = parser.parse_args()
+    
+    t = DynamicTermination(input_filepath=args.input_filepath, 
+                           diff_of_residual=args.residual_diff, 
+                           max_w_fraction_criterium=args.w_f_criterium,
+                           idx_increment=args.sample_chunk)
+    
+    start_time = time.time()
+    result = t.find_time_to_terminate()
+    elapsed_time = time.time() - start_time
+    
+    if result:
+        print(f"Anomaly has occurred at: {result}s")
+    else:
+        print("Anomaly was not found in this sample")
+    
+    print(f"Elapsed time: {elapsed_time:.2f} seconds")
