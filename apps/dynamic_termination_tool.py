@@ -7,8 +7,7 @@ class DynamicTermination:
     A class to find the time of anomaly occurrence in a sample dataset.
 
     Methods:
-        find_time_to_terminate():
-            Finds the time of anomaly occurrence in the input dataset.
+        - find_time_to_terminate():
     """
 
     def __init__(self, input_filepath: str, diff_of_residual: float=0.1, max_w_fraction_criterium: float=0.5, idx_increment: int=20000):

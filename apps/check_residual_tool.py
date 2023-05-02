@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 from constants import TIME_PATTERN, SOLVER_PATTERN
 
+
 class CheckResidual:
     """
     A class for reading, parsing, and writing the time and final residual values of different solvers in a log file.
@@ -19,8 +20,11 @@ class CheckResidual:
         Initializes the class with the given input parameters.
 
         Args:
-            time_pattern (re.Pattern, optional): Regular expression pattern to match the time value in the log file. Defaults to TIME_PATTERN.
-            solver_pattern (re.Pattern, optional): Regular expression pattern to match the final residual values for different solvers in the log file. Defaults to SOLVER_PATTERN.
+            time_pattern (re.Pattern, optional): 
+            Regular expression pattern to match the time value in the log file. Defaults to TIME_PATTERN.
+            solver_pattern (re.Pattern, optional): 
+            Regular expression pattern to match the final residual values for different solvers in the log file. 
+            Defaults to SOLVER_PATTERN.
         """
         self.lst = []
         self.time_pattern = time_pattern
@@ -46,7 +50,8 @@ class CheckResidual:
 
         Args:
             input_filepath (str): The path to the input log file.
-            chunk_size_in_bytes (int, optional): The size of the chunks in (bytes*bytes) to read from the input file at a time.
+            chunk_size_in_bytes (int, optional): 
+            The size of the chunks in (bytes*bytes) to read from the input file at a time.
             Defaults to 1024.
         """
         try:   
@@ -85,8 +90,10 @@ class CheckResidual:
         Plots the final residual values for each solver over time.
 
         Args:
-            figx (int, optional): The width of the graph in inches. Defaults to 20.
-            figy (int, optional): The height of the graph in inches. Defaults to 20.
+            figx (int, optional): 
+            The width of the graph in inches. Defaults to 20.
+            figy (int, optional): 
+            The height of the graph in inches. Defaults to 20.
         """
         try:    
             x = [float(t[0]) for t in self.lst]
@@ -114,7 +121,8 @@ class CheckResidual:
         Saves the final list of tuples containing the time and final residual values for each solver to a CSV file.
 
         Args:
-            output_filepath (str, optional): The path and filename for the output file. Defaults to 'output.csv'.
+            output_filepath (str, optional): 
+            The path and filename for the output file. Defaults to 'output.csv'.
         """
         try:
             with open(f'{output_filepath}.csv', 'w', newline='') as file:
@@ -130,9 +138,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Check for residual toolscript')
     
     parser.add_argument('input_filepath', type=str, help='path to the input file')
-    parser.add_argument('--print', type=bool, help='argument for printing result')
+    parser.add_argument('--print', type=bool, default=False, help='argument for printing result')
     parser.add_argument('--chunk', type=int, default=1024, help='size of the chunks in bytes (default: 1024)')
-    parser.add_argument('--plot', type=bool, help='argument for ploting graph')
+    parser.add_argument('--plot', type=bool, default=False, help='argument for ploting graph')
     parser.add_argument('--figure_size', type=str, default='20, 20', help='x and y size of graph figure, use in string separated by ","')
     parser.add_argument('--output', type=str, help='path for the output file')
 
