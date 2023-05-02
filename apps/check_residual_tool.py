@@ -1,12 +1,27 @@
 import re, csv, argparse, time
 import matplotlib.pyplot as plt
 
-TIME_PATTERN = r"^Time = (\d+\.\d+)$"
-SOLVER_PATTERN = r"Solving for (\w+), Initial residual = \d+\.\d+e?-?\d+, Final residual = (\d+\.\d+e?-?\d+), No Iterations \d+$"
+from constants import TIME_PATTERN, SOLVER_PATTERN
 
 class CheckResidual:
+    """
+    A class for reading, parsing, and writing the time and final residual values of different solvers in a log file.
+
+     Methods:
+        - get_result()
+        - find_time_step_and_residuals()
+        - plot_graph()
+        - save_to_file()   
+    """
 
     def __init__(self, time_pattern: re.Pattern=TIME_PATTERN, solver_pattern: re.Pattern=SOLVER_PATTERN) -> None:
+        """
+        Initializes the class with the given input parameters.
+
+        Args:
+            time_pattern (re.Pattern, optional): Regular expression pattern to match the time value in the log file. Defaults to TIME_PATTERN.
+            solver_pattern (re.Pattern, optional): Regular expression pattern to match the final residual values for different solvers in the log file. Defaults to SOLVER_PATTERN.
+        """
         self.lst = []
         self.time_pattern = time_pattern
         self.solver_pattern = solver_pattern
@@ -16,9 +31,24 @@ class CheckResidual:
         self.k = None
 
     def get_result(self):
+        """
+        Returns the final list of tuples containing the time and final residual values for each solver.
+
+        Returns:
+            list: A list of tuples containing the time and final residual values for each solver.
+        """
         return self.lst
 
     def find_time_step_and_residuals(self, input_filepath: str, chunk_size_in_bytes: int=1024) -> None:
+        """
+        Parses the log file, extracts the time value and the final residual values for different solvers,
+        and stores the values in the instance variable 'lst'.
+
+        Args:
+            input_filepath (str): The path to the input log file.
+            chunk_size_in_bytes (int, optional): The size of the chunks in (bytes*bytes) to read from the input file at a time.
+            Defaults to 1024.
+        """
         try:   
             with open(input_filepath, "r") as file:
                 while True:
@@ -51,6 +81,13 @@ class CheckResidual:
             print(f"An error occurred while reading the file: {e}")
 
     def plot_graph(self, figx=20, figy=20) -> None:
+        """
+        Plots the final residual values for each solver over time.
+
+        Args:
+            figx (int, optional): The width of the graph in inches. Defaults to 20.
+            figy (int, optional): The height of the graph in inches. Defaults to 20.
+        """
         try:    
             x = [float(t[0]) for t in self.lst]
             p_rgh_y = [float(t[1]) for t in self.lst]
@@ -73,6 +110,12 @@ class CheckResidual:
             print(f"An error occurred while plotting the graph: {e}")
         
     def save_to_file(self, output_filepath: str='output') -> None:
+        """
+        Saves the final list of tuples containing the time and final residual values for each solver to a CSV file.
+
+        Args:
+            output_filepath (str, optional): The path and filename for the output file. Defaults to 'output.csv'.
+        """
         try:
             with open(f'{output_filepath}.csv', 'w', newline='') as file:
                 writer = csv.writer(file, delimiter=';')
@@ -81,6 +124,7 @@ class CheckResidual:
         
         except Exception as e:
             print(f"An error occurred while saving the file: {e}")
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Check for residual toolscript')

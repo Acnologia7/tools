@@ -1,16 +1,38 @@
-import pandas as pd
 import argparse, time
+import pandas as pd
 
 
 class DynamicTermination:
-    
+    """
+    A class to find the time of anomaly occurrence in a sample dataset.
+
+    Methods:
+        find_time_to_terminate():
+            Finds the time of anomaly occurrence in the input dataset.
+    """
+
     def __init__(self, input_filepath: str, diff_of_residual: float=0.1, max_w_fraction_criterium: float=0.5, idx_increment: int=20000):
+        """
+        Initializes the class with the given input parameters.
+
+        Args:
+            input_filepath (str): Path to the input file.
+            diff_of_residual (float, optional): How big is the residual difference (maximum). Defaults to 0.1.
+            max_w_fraction_criterium (float, optional): Maximum value of water fraction criterium in time T. Defaults to 0.5.
+            idx_increment (int, optional): Chunk size of search sample. Defaults to 20000.
+        """
         self.input_filepath = input_filepath
         self.diff_of_residual = diff_of_residual
         self.idx_increment = idx_increment
         self.max_w_fraction_criterium = max_w_fraction_criterium
 
     def find_time_to_terminate(self):
+        """
+        Finds the time of anomaly occurrence in the input dataset.
+
+        Returns:
+            float: Time of anomaly occurrence if found, otherwise None.
+        """
         try:
             df = pd.read_csv(self.input_filepath, skiprows=2, delim_whitespace=True, 
                          names=['Time', 'Water Fraction'], comment='#', 
@@ -30,7 +52,7 @@ class DynamicTermination:
             return None
             '''
 
-            #faster?
+            #Should be faster
             mask = df['Water Fraction'] < self.max_w_fraction_criterium
             start_idxs = df[mask].index
 
